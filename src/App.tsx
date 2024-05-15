@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'
+import axios from 'axios';
+import Form from './components/Form';
 
 interface User {
   id: number;
@@ -11,9 +12,10 @@ interface User {
 
 const App: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Загрузка данных с сервера при монтировании компонента
     axios.get<User[]>('https://8306efc93b20a953.mokky.dev/users')
       .then(response => {
         setUsers(response.data);
@@ -24,18 +26,38 @@ const App: React.FC = () => {
   }, []);
 
   const handleDelete = (id: number) => {
-    // Логика удаления пользователя
+    setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
     console.log('Deleting user with id', id);
   };
 
-  const handleEdit = (id: number) => {
-    // Логика редактирования пользователя
-    console.log('Editing user with id', id);
+  const handleEdit = (user: User) => {
+    setCurrentUser(user);
+    setIsModalOpen(true);
   };
-  console.log(users)
+
+  const handleAddNew = () => {
+    setCurrentUser(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = (user: User) => {
+    if (user.id) {
+      setUsers(prevUsers => prevUsers.map(u => u.id === user.id ? user : u));
+    } else {
+      user.id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
+      setUsers(prevUsers => [...prevUsers, user]);
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="App">
       <h1>Список пользователей</h1>
+      <button onClick={handleAddNew}>Добавить нового пользователя</button>
       <table>
         <thead>
           <tr>
@@ -56,13 +78,20 @@ const App: React.FC = () => {
               <td>{user.email}</td>
               <td>{user.skills ? user.skills.join(', ') : ''}</td>
               <td>
-                <button onClick={() => handleEdit(user.id)}>Редактировать</button>
+                <button onClick={() => handleEdit(user)}>Редактировать</button>
                 <button onClick={() => handleDelete(user.id)}>Удалить</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {isModalOpen && (
+        <Form 
+          user={currentUser} 
+          onSave={handleSave} 
+          onCancel={handleCancel} 
+        />
+      )}
     </div>
   );
 }
