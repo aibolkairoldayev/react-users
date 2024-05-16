@@ -91,17 +91,7 @@ const Form: React.FC<FormProps> = ({ user, onSave, onCancel, title }) => {
           />
         </label>
       </div>
-      <div>
-        <label>
-          Дата регистрации:
-          <input
-            type="text"
-            name="date"
-            value={formData.date}
-            readOnly
-          />
-        </label>
-      </div>
+      
       <button onClick={handleSave}>Сохранить</button>
       <button onClick={onCancel}>Отмена</button>
     </div>

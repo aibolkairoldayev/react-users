@@ -23,12 +23,26 @@ const App: React.FC = () => {
   useEffect(() => {
     axios.get<User[]>('https://8306efc93b20a953.mokky.dev/users')
       .then(response => {
-        setUsers(response.data);
+        const formattedUsers = response.data.map(user => ({
+          ...user,
+          date: formatDate(user.date)
+        }));
+        setUsers(formattedUsers);
       })
       .catch(error => {
         console.error('Error fetching users:', error);
       });
   }, []);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
+  };
 
   const handleDelete = (id: number) => {
     setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
@@ -55,10 +69,11 @@ const App: React.FC = () => {
 
   const handleSave = (user: User) => {
     if (user.id) {
-      setUsers(prevUsers => prevUsers.map(u => u.id === user.id ? user : u));
+      setUsers(prevUsers => prevUsers.map(u => u.id === user.id ? { ...user, date: formatDate(user.date) } : u));
     } else {
       user.id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
       user.date = new Date().toISOString();
+      user.date = formatDate(user.date);
       setUsers(prevUsers => [...prevUsers, user]);
     }
     setIsModalOpen(false);
