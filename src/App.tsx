@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from './store';
+import { setUsers, addUser, updateUser, deleteUser } from './usersSlice';
 import Form from './components/Form';
 import UserView from './UserView';
 
@@ -14,7 +17,8 @@ interface User {
 }
 
 const App: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const users = useSelector((state: RootState) => state.users.users);
+  const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [deleteId, setDeleteId] = useState<string>('');
@@ -27,12 +31,12 @@ const App: React.FC = () => {
           ...user,
           date: formatDate(user.date)
         }));
-        setUsers(formattedUsers);
+        dispatch(setUsers(formattedUsers));
       })
       .catch(error => {
         console.error('Error fetching users:', error);
       });
-  }, []);
+  }, [dispatch]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -45,8 +49,7 @@ const App: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
-    console.log('Deleting user with id', id);
+    dispatch(deleteUser(id));
   };
 
   const handleEdit = (user: User) => {
@@ -69,12 +72,12 @@ const App: React.FC = () => {
 
   const handleSave = (user: User) => {
     if (user.id) {
-      setUsers(prevUsers => prevUsers.map(u => u.id === user.id ? { ...user, date: formatDate(user.date) } : u));
+      dispatch(updateUser(user));
     } else {
       user.id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
       user.date = new Date().toISOString();
       user.date = formatDate(user.date);
-      setUsers(prevUsers => [...prevUsers, user]);
+      dispatch(addUser(user));
     }
     setIsModalOpen(false);
   };
@@ -98,7 +101,7 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={
-          <div className="App">
+          <div className="container mx-auto p-4">
             <h1>Список пользователей</h1>
             <button onClick={handleAddNew}>Добавить нового пользователя</button>
             <table>

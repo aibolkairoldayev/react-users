@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 
 interface User {
   id: number;
@@ -17,85 +18,74 @@ interface FormProps {
 }
 
 const Form: React.FC<FormProps> = ({ user, onSave, onCancel, title }) => {
-  const [formData, setFormData] = useState<User>({
-    id: user?.id || 0,
-    name: user?.name || '',
-    surname: user?.surname || '',
-    email: user?.email || '',
-    skills: user?.skills || [],
-    date: user?.date || new Date().toISOString(),
+  const { control, handleSubmit, reset, setValue } = useForm<User>({
+    defaultValues: {
+      id: 0,
+      name: '',
+      surname: '',
+      email: '',
+      skills: [],
+      date: new Date().toISOString(),
+    }
   });
 
   useEffect(() => {
     if (user) {
-      setFormData(user);
+      reset(user);
     }
-  }, [user]);
+  }, [user, reset]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      [name]: value
-    }));
-  };
-
-  const handleSave = () => {
-    onSave(formData);
+  const onSubmit = (data: User) => {
+    onSave(data);
   };
 
   return (
     <div className="modal">
       <h2>{title}</h2>
-      <div>
-        <label>
-          Имя:
-          <input
-            type="text"
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div>
+          <label>Имя:</label>
+          <Controller
             name="name"
-            value={formData.name}
-            onChange={handleChange}
+            control={control}
+            render={({ field }) => <input {...field} />}
           />
-        </label>
-      </div>
-      <div>
-        <label>
-          Фамилия:
-          <input
-            type="text"
+        </div>
+        <div>
+          <label>Фамилия:</label>
+          <Controller
             name="surname"
-            value={formData.surname}
-            onChange={handleChange}
+            control={control}
+            render={({ field }) => <input {...field} />}
           />
-        </label>
-      </div>
-      <div>
-        <label>
-          Email:
-          <input
-            type="email"
+        </div>
+        <div>
+          <label>Email:</label>
+          <Controller
             name="email"
-            value={formData.email}
-            onChange={handleChange}
+            control={control}
+            render={({ field }) => <input type="email" {...field} />}
           />
-        </label>
-      </div>
-      <div>
-        <label>
-          Навыки:
-          <input
-            type="text"
+        </div>
+        <div>
+          <label>Навыки:</label>
+          <Controller
             name="skills"
-            value={formData.skills.join(', ')}
-            onChange={(e) => setFormData({ ...formData, skills: e.target.value.split(', ') })}
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                value={field.value.join(', ')}
+                onChange={(e) => field.onChange(e.target.value.split(', '))}
+              />
+            )}
           />
-        </label>
-      </div>
-      
-      <button onClick={handleSave}>Сохранить</button>
-      <button onClick={onCancel}>Отмена</button>
+        </div>
+        <button type="submit">Сохранить</button>
+        <button type="button" onClick={onCancel}>Отмена</button>
+      </form>
     </div>
   );
-}
+};
 
 export default Form;
