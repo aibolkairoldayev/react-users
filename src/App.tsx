@@ -6,6 +6,7 @@ import { RootState } from './store';
 import { setUsers, addUser, updateUser, deleteUser } from './usersSlice';
 import Form from './components/Form';
 import UserView from './UserView';
+import Sort from './components/Sort';
 
 interface User {
   id: number;
@@ -23,30 +24,17 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [deleteId, setDeleteId] = useState<string>('');
   const [modalTitle, setModalTitle] = useState<string>('');
+  const [sortType, setSortType] = useState<string>('alphabetical-asc');
 
   useEffect(() => {
     axios.get<User[]>('https://8306efc93b20a953.mokky.dev/users')
       .then(response => {
-        const formattedUsers = response.data.map(user => ({
-          ...user,
-          date: formatDate(user.date)
-        }));
-        dispatch(setUsers(formattedUsers));
+        dispatch(setUsers(response.data));
       })
       .catch(error => {
         console.error('Error fetching users:', error);
       });
   }, [dispatch]);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}.${month}.${year} ${hours}:${minutes}`;
-  };
 
   const handleDelete = (id: number) => {
     dispatch(deleteUser(id));
@@ -76,7 +64,6 @@ const App: React.FC = () => {
     } else {
       user.id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
       user.date = new Date().toISOString();
-      user.date = formatDate(user.date);
       dispatch(addUser(user));
     }
     setIsModalOpen(false);
@@ -97,6 +84,25 @@ const App: React.FC = () => {
     setDeleteId('');
   };
 
+  const handleSortChange = (sortType: string) => {
+    setSortType(sortType);
+  };
+
+  const getSortedUsers = () => {
+    const sortedUsers = [...users];
+    switch (sortType) {
+      case 'alphabetical-asc':
+        sortedUsers.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'alphabetical-desc':
+        sortedUsers.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      default:
+        break;
+    }
+    return sortedUsers;
+  };
+
   return (
     <Router>
       <Routes>
@@ -104,6 +110,7 @@ const App: React.FC = () => {
           <div className="container mx-auto p-4">
             <h1>Список пользователей</h1>
             <button onClick={handleAddNew}>Добавить нового пользователя</button>
+            <Sort onSortChange={handleSortChange} />
             <table>
               <thead>
                 <tr>
@@ -117,7 +124,7 @@ const App: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map(user => (
+                {getSortedUsers().map(user => (
                   <tr key={user.id}>
                     <td>{user.id}</td>
                     <td>{user.name}</td>
