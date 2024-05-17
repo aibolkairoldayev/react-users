@@ -78,57 +78,71 @@ const Form: React.FC<FormProps> = ({ user, onSave, onCancel, title }) => {
   };
 
   return (
-    <div className="modal">
-      <h2>{title}</h2>
-      <div>
-        <label>
-          Имя:
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Фамилия:
-          <input
-            type="text"
-            name="surname"
-            value={formData.surname}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>Навыки:</label>
-        {formData.skills.map((skill, index) => (
-          <div key={index} className="flex items-center">
-            <input
-              type="text"
-              value={skill}
-              onChange={(e) => handleSkillChange(index, e.target.value)}
-            />
-            <button type="button" onClick={() => handleRemoveSkill(index)}>Удалить</button>
+    <div className="my-3 mx-auto w-3/5 forma">
+      <div className="text-2xl mb-3">{title}</div>
+      <div className="form-content flex">
+        <div className="form-left">
+          <div className="form-item">
+            <label>
+              Имя:
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </label>
           </div>
-        ))}
-        <button type="button" onClick={handleAddSkill}>Добавить навык</button>
+          <div className="form-item">
+            <label>
+              Фамилия:
+              <input
+                type="text"
+                name="surname"
+                value={formData.surname}
+                onChange={handleChange}
+              />
+            </label>
+          </div>
+          <div className="form-item">
+            <label>
+              Email:
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </label>
+          </div>
+        </div>
+        <div className="form-right">
+          <div className="form-item">
+          <div className="flex justify-center">
+            <label className="mr-3">Навыки:</label>
+            <div>
+            {formData.skills.map((skill, index) => (
+              <div key={index} className="flex items-center mb-2">
+                <input
+                  type="text"
+                  value={skill}
+                  onChange={(e) => handleSkillChange(index, e.target.value)}
+                />
+                <button className="rounded bg-red-500 py-0.5 px-2 h-6 flex items-center ml-3" type="button" onClick={() => handleRemoveSkill(index)}>Удалить</button>
+              </div>
+            ))}
+            </div>
+          </div>
+          <button className="py-0.5 px-2 mt-2 rounded bg-lime-500 h-6 flex items-center block mx-auto" type="button" onClick={handleAddSkill}>Добавить навык</button>
+        </div>
+        </div>        
+
       </div>
-      <button onClick={handleSave}>Сохранить</button>
-      <button onClick={onCancel}>Отмена</button>
+            
+      <div className="flex justify-center mt-5">
+        <button className="py-0.5 px-2 rounded bg-lime-500 mr-4" onClick={handleSave}>Сохранить</button>
+        <button className="bg-sky-500 py-0.5 px-2 rounded" onClick={onCancel}>Отмена</button>
+      </div>
     </div>
   );
 }

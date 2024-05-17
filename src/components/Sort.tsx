@@ -6,7 +6,7 @@ interface SortProps {
 
 const Sort: React.FC<SortProps> = ({ onSortChange }) => {
   return (
-    <div>
+    <div className="mx-8">
       <label htmlFor="sort">Сортировать по: </label>
       <select id="sort" onChange={(e) => onSortChange(e.target.value)}>
         <option value="alphabetical-asc">По алфавиту (А-Я)</option>
